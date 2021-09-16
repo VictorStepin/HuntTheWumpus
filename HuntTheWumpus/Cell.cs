@@ -4,7 +4,8 @@ namespace HuntTheWumpus
     {
         public CellContent Content { get; set; }
 
-        public Cell (CellContent content) {
+        public Cell (CellContent content)
+        {
             Content = content;
         }
     }

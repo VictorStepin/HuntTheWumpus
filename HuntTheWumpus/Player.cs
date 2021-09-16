@@ -2,22 +2,29 @@ namespace HuntTheWumpus
 {
     class Player
     {
-        public int Location { get; set; }
+        public Location Location { get;  private set; }
 
-        public Player()
+        public Player (Location location)
         {
-            Location = 0;
+            Location = location;
         }
 
         public void Move (Direction direction)
         {
-            if (direction == Direction.Left)
+            switch (direction)
             {
-                Location -= 1;
-            }
-            else
-            {
-                Location += 1;
+                case Direction.Up:
+                    Location = new Location(Location.X, Location.Y - 1);
+                    break;
+                case Direction.Right:
+                    Location = new Location(Location.X + 1, Location.Y);
+                    break;
+                case Direction.Down:
+                    Location = new Location(Location.X, Location.Y + 1);
+                    break;
+                case Direction.Left:
+                    Location = new Location(Location.X - 1, Location.Y);
+                    break;
             }
         }
     }

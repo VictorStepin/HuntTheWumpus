@@ -2,7 +2,9 @@ namespace HuntTheWumpus
 {
     enum Direction
     {
-        Left,
-        Right
+        Up,
+        Right,
+        Down,
+        Left
     }
 }
