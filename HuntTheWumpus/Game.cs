@@ -4,15 +4,19 @@ namespace HuntTheWumpus
 {
     class Game
     {
-        private bool _isRunning;
+        private const int MAZE_DIMENSION = 6;
 
         private Maze _maze;
         private Player _player;
+        private Wumpus _wumpus;
+
+        private bool _isRunning;
 
         public Game ()
         {
-            _maze = new Maze(6);
-            _player = new Player(new Location(0, 0));
+            _maze = new Maze(MAZE_DIMENSION);
+            _player = new Player(new Location(1, 2));
+            _wumpus = new Wumpus(new Location(4, 3));
 
             _isRunning = true;
         }
@@ -23,8 +27,8 @@ namespace HuntTheWumpus
             {
                 UpdateMaze();
 
+                // Ход игрока
                 ConsoleKey inputKey = Console.ReadKey(true).Key;
-
                 switch (inputKey)
                 {
                     case ConsoleKey.W:
@@ -56,6 +60,20 @@ namespace HuntTheWumpus
                         _isRunning = false;
                         break;
                 }
+
+                // Ход Вампуса
+                Direction wumpusDirection = (Direction)new Random().Next(0, 5);
+                _wumpus.Move(wumpusDirection);
+
+                // Проверка, не находятся ли игрок и Вампус на одной клетке
+                if (_player.Location.X == _wumpus.Location.X &&
+                    _player.Location.Y == _wumpus.Location.Y)
+                {
+                    UpdateMaze();
+                    Console.WriteLine("Вампус съел тебя!");
+                    Console.WriteLine("Игра закончена.");
+                    break;
+                }
             }
         }
 
@@ -65,15 +83,15 @@ namespace HuntTheWumpus
             
             _maze.Clear();
 
-            Cell[,] mazeCells = _maze.Cells;
-            mazeCells[_player.Location.X, _player.Location.Y].Content = CellContent.Player;
+            _maze.Cells[_player.Location.X, _player.Location.Y].Content = CellContent.Player;
+            _maze.Cells[_wumpus.Location.X, _wumpus.Location.Y].Content = CellContent.Wumpus;
 
 
-            for (int y = 0; y < mazeCells.GetLength(1); y++) 
+            for (int y = 0; y < _maze.Cells.GetLength(1); y++) 
             {
-                for (int x = 0; x < mazeCells.GetLength(0); x++)
+                for (int x = 0; x < _maze.Cells.GetLength(0); x++)
                 {
-                    Cell cell = mazeCells[x, y];
+                    Cell cell = _maze.Cells[x, y];
 
                     switch (cell.Content)
                     {
@@ -82,6 +100,9 @@ namespace HuntTheWumpus
                             break;
                         case CellContent.Player:
                             Console.Write("[@]");
+                            break;
+                        case CellContent.Wumpus:
+                            Console.Write("[W]");
                             break;
                     }
                 }
