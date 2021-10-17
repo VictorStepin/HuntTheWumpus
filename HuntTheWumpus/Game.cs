@@ -27,67 +27,33 @@ namespace HuntTheWumpus
             {
                 UpdateMaze();
 
-                // Ход игрока
-                ConsoleKey inputKey = Console.ReadKey(true).Key;
-                switch (inputKey)
-                {
-                    case ConsoleKey.W:
-                        if (_player.Location.Y != 0)
-                        {
-                            _player.Move(Direction.Up);
-                        }
-                        break;
-                    case ConsoleKey.A:
-                        if (_player.Location.X != 0)
-                        {
-                            _player.Move(Direction.Left);
-                        }
-                        break;
-                    case ConsoleKey.S:
-                        if (_player.Location.Y != _maze.Cells.GetLength(1) - 1)
-                        {
-                            _player.Move(Direction.Down);
-                        }
-                        break;
-                    case ConsoleKey.D:
-                        if (_player.Location.X != _maze.Cells.GetLength(0) - 1)
-                        {
-                            _player.Move(Direction.Right);
-                        }
-                        break;
-                    case ConsoleKey.X:
-                        Console.Clear();
-                        _isRunning = false;
-                        break;
-                }
+                ConsoleKey actionKey = Console.ReadKey(true).Key;
+                PerformPlayerAction(actionKey);
 
-                // Ход Вампуса
-                Direction wumpusDirection = (Direction)new Random().Next(0, 5);
-                _wumpus.Move(wumpusDirection);
+                Direction wumpusDirection = (Direction)new Random().Next(0, 4);
+                PerformWumpusMove(wumpusDirection);
 
-                // Проверка, не находятся ли игрок и Вампус на одной клетке
-                if (_player.Location.X == _wumpus.Location.X &&
-                    _player.Location.Y == _wumpus.Location.Y)
+                if (IsGameOver())
                 {
                     UpdateMaze();
-                    Console.WriteLine("Вампус съел тебя!");
+                    Console.WriteLine("\nВампус съел тебя!");
                     Console.WriteLine("Игра закончена.");
-                    break;
+                    _isRunning = false;
                 }
             }
         }
 
-        private void UpdateMaze ()
+        private void UpdateMaze()
         {
             Console.Clear();
-            
+
             _maze.Clear();
 
             _maze.Cells[_player.Location.X, _player.Location.Y].Content = CellContent.Player;
             _maze.Cells[_wumpus.Location.X, _wumpus.Location.Y].Content = CellContent.Wumpus;
 
 
-            for (int y = 0; y < _maze.Cells.GetLength(1); y++) 
+            for (int y = 0; y < _maze.Cells.GetLength(1); y++)
             {
                 for (int x = 0; x < _maze.Cells.GetLength(0); x++)
                 {
@@ -108,6 +74,79 @@ namespace HuntTheWumpus
                 }
                 Console.WriteLine();
             }
+
+            Console.WriteLine("X - выход");
+        }
+
+        private void PerformPlayerAction(ConsoleKey actionKey)
+        {
+            switch (actionKey)
+            {
+                case ConsoleKey.W:
+                    if (_player.Location.Y != 0)
+                    {
+                        _player.Move(Direction.Up);
+                    }
+                    break;
+                case ConsoleKey.A:
+                    if (_player.Location.X != 0)
+                    {
+                        _player.Move(Direction.Left);
+                    }
+                    break;
+                case ConsoleKey.S:
+                    if (_player.Location.Y != _maze.Cells.GetLength(1) - 1)
+                    {
+                        _player.Move(Direction.Down);
+                    }
+                    break;
+                case ConsoleKey.D:
+                    if (_player.Location.X != _maze.Cells.GetLength(0) - 1)
+                    {
+                        _player.Move(Direction.Right);
+                    }
+                    break;
+                case ConsoleKey.X:
+                    Console.Clear();
+                    _isRunning = false;
+                    break;
+            }
+        }
+
+        private void PerformWumpusMove(Direction wumpusDirection)
+        {
+            switch (wumpusDirection)
+            {
+                case Direction.Up:
+                    if (_wumpus.Location.Y != 0)
+                    {
+                        _wumpus.Move(wumpusDirection);
+                    }
+                    break;
+                case Direction.Right:
+                    if (_wumpus.Location.X != _maze.Cells.GetLength(0) - 1)
+                    {
+                        _wumpus.Move(wumpusDirection);
+                    }
+                    break;
+                case Direction.Down:
+                    if (_wumpus.Location.Y != _maze.Cells.GetLength(1) - 1)
+                    {
+                        _wumpus.Move(wumpusDirection);
+                    }
+                    break;
+                case Direction.Left:
+                    if (_wumpus.Location.X != 0)
+                    {
+                        _wumpus.Move(wumpusDirection);
+                    }
+                    break;
+            }
+        }
+
+        private bool IsGameOver()
+        {
+            return _player.Location.X == _wumpus.Location.X && _player.Location.Y == _wumpus.Location.Y;
         }
     }
 }
