@@ -5,16 +5,21 @@ namespace HuntTheWumpus
     class Game
     {
         private const int MAZE_DIMENSION = 6;
+        private const int MESSAGES_MAX_COUNT = 5;
 
         private Maze _maze;
         private Player _player;
         private Wumpus _wumpus;
+
+        private string[] _messages;
 
         public Game ()
         {
             _maze = new Maze(MAZE_DIMENSION);
             _player = new Player(new Location(1, 2));
             _wumpus = new Wumpus(new Location(4, 3));
+
+            _messages = new string[MESSAGES_MAX_COUNT];
         }
 
         public void Run ()
@@ -22,12 +27,18 @@ namespace HuntTheWumpus
             while (_player.Alive && _wumpus.Alive)
             {
                 UpdateMaze();
+                ClearMessages();
 
                 ConsoleKey actionKey = Console.ReadKey(true).Key;
                 PerformPlayerAction(actionKey);
 
                 Direction wumpusDirection = (Direction)new Random().Next(0, 4);
                 PerformWumpusMove(wumpusDirection);
+
+                if (TwoObjectsLocationsNearby(_player.Location, _wumpus.Location))
+                {
+                    AddMessage("Вы чувствуете отвратительный запах..");
+                }
 
                 if (WumpusAtePlayer())
                 {
@@ -38,18 +49,17 @@ namespace HuntTheWumpus
 
             if (!_player.Alive)
             {
-                Console.WriteLine("Игра закончена.");
+                AddMessage("Игра закончена.");
             }
             else if (!_wumpus.Alive)
             {
-                Console.WriteLine("Вы убили Вампуса. Победа!");
+                AddMessage("Вы убили Вампуса. Победа!");
             }
         }
 
-        private void UpdateMaze()
+        private void UpdateMaze ()
         {
             Console.Clear();
-
             _maze.Clear();
 
             _maze.Cells[_player.Location.X, _player.Location.Y].Content = CellContent.Player;
@@ -85,15 +95,12 @@ namespace HuntTheWumpus
                 Console.WriteLine();
             }
 
-            if (TwoObjectsLocationsNearby(_player.Location, _wumpus.Location))
-            {
-                Console.WriteLine("Вы чувствуете отвратительный запах..");
-            }
+            PrintMessages();
 
             Console.WriteLine("\nX - выход");
         }
 
-        private void PerformPlayerAction(ConsoleKey actionKey)
+        private void PerformPlayerAction (ConsoleKey actionKey)
         {
             switch (actionKey)
             {
@@ -155,7 +162,7 @@ namespace HuntTheWumpus
             }
         }
 
-        private void PerformWumpusMove(Direction wumpusDirection)
+        private void PerformWumpusMove (Direction wumpusDirection)
         {
             int moveProbability = new Random().Next(0, 100);
             if (moveProbability <= 25)
@@ -190,12 +197,12 @@ namespace HuntTheWumpus
             }
         }
 
-        private bool WumpusAtePlayer()
+        private bool WumpusAtePlayer ()
         {
             return _player.Location.X == _wumpus.Location.X && _player.Location.Y == _wumpus.Location.Y;
         }
 
-        private bool TwoObjectsLocationsNearby(Location ol1, Location ol2)
+        private bool TwoObjectsLocationsNearby (Location ol1, Location ol2)
         {
             if (ol1.X == ol2.X && ol1.Y == ol2.Y + 1 ||
                 ol1.X == ol2.X - 1 && ol1.Y == ol2.Y + 1 ||
@@ -210,6 +217,44 @@ namespace HuntTheWumpus
             }
             
             return false;
+        }
+
+        private void ClearMessages ()
+        {
+            for (int i = 0; i < _messages.Length; i++)
+            {
+                _messages[i] = null;
+            }
+        }
+
+        private void AddMessage (string message)
+        {
+            bool messageAdded = false;
+            for (int i = 0; i < _messages.Length; i++)
+            {
+                if (_messages[i] == null)
+                {
+                    _messages[i] = message;
+                    messageAdded = true;
+                    break;
+                }
+            }
+
+            if (!messageAdded)
+            {
+                Console.WriteLine("ERROR!!!!!!!");
+            }
+        }
+
+        private void PrintMessages ()
+        {
+            for (int i = 0; i < _messages.Length; i++)
+            {
+                if (_messages[i] != null)
+                {
+                    Console.WriteLine(_messages[i]);
+                }
+            }
         }
     }
 }
