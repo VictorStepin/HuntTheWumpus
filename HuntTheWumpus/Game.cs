@@ -10,14 +10,29 @@ namespace HuntTheWumpus
         private Maze _maze;
         private Player _player;
         private Wumpus _wumpus;
+        private bool _wumpusRevealed;
 
         private string[] _messages;
 
         public Game ()
         {
+            Random rng = new Random();
+
             _maze = new Maze(MAZE_DIMENSION);
-            _player = new Player(new Location(1, 2));
-            _wumpus = new Wumpus(new Location(4, 3));
+
+            Location playerStartLocation = new Location(rng.Next(0, _maze.Cells.GetLength(0)),
+                                                        rng.Next(0, _maze.Cells.GetLength(1)));
+            _player = new Player(playerStartLocation);
+            
+            Location wumpusStartLocation = new Location(rng.Next(0, _maze.Cells.GetLength(0)),
+                                                        rng.Next(0, _maze.Cells.GetLength(1)));
+            while (wumpusStartLocation == playerStartLocation || TwoObjectsLocationsNearby(playerStartLocation, wumpusStartLocation))
+            {
+                wumpusStartLocation = new Location(rng.Next(0, _maze.Cells.GetLength(0)),
+                                                   rng.Next(0, _maze.Cells.GetLength(1)));
+            }
+            _wumpus = new Wumpus(wumpusStartLocation);
+            _wumpusRevealed = false;
 
             _messages = new string[MESSAGES_MAX_COUNT];
         }
@@ -42,6 +57,8 @@ namespace HuntTheWumpus
 
                 if (WumpusAtePlayer())
                 {
+                    _wumpusRevealed = true;
+                    AddMessage("Вампус съел вас!");
                     UpdateMaze();
                     _player.Alive = false;
                 }
@@ -55,6 +72,8 @@ namespace HuntTheWumpus
             {
                 AddMessage("Вы убили Вампуса. Победа!");
             }
+            UpdateMaze();
+
         }
 
         private void UpdateMaze ()
@@ -84,11 +103,18 @@ namespace HuntTheWumpus
                             Console.Write("]");
                             break;
                         case CellContent.Wumpus:
-                            Console.Write("[");
-                            Console.ForegroundColor = ConsoleColor.Red;
-                            Console.Write("W");
-                            Console.ForegroundColor = ConsoleColor.White;
-                            Console.Write("]");
+                            if (_wumpusRevealed)
+                            {
+                                Console.Write("[");
+                                Console.ForegroundColor = ConsoleColor.Red;
+                                Console.Write("W");
+                                Console.ForegroundColor = ConsoleColor.White;
+                                Console.Write("]");
+                            }
+                            else
+                            {
+                                Console.Write("[ ]");
+                            }
                             break;
                     }
                 }
@@ -132,6 +158,7 @@ namespace HuntTheWumpus
                     if (_wumpus.Location.X == _player.Location.X &&
                         _wumpus.Location.Y == _player.Location.Y - 1)
                     {
+                        _wumpusRevealed = true;
                         _wumpus.Alive = false;
                     }
                     break;
@@ -139,6 +166,7 @@ namespace HuntTheWumpus
                     if (_wumpus.Location.X == _player.Location.X - 1 &&
                         _wumpus.Location.Y == _player.Location.Y)
                     {
+                        _wumpusRevealed = true;
                         _wumpus.Alive = false;
                     }
                     break;
@@ -146,6 +174,7 @@ namespace HuntTheWumpus
                     if (_wumpus.Location.X == _player.Location.X &&
                         _wumpus.Location.Y == _player.Location.Y + 1)
                     {
+                        _wumpusRevealed = true;
                         _wumpus.Alive = false;
                     }
                     break;
@@ -153,6 +182,7 @@ namespace HuntTheWumpus
                     if (_wumpus.Location.X == _player.Location.X + 1 &&
                         _wumpus.Location.Y == _player.Location.Y)
                     {
+                        _wumpusRevealed = true;
                         _wumpus.Alive = false;
                     }
                     break;

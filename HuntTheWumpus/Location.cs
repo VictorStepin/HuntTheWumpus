@@ -10,5 +10,15 @@ namespace HuntTheWumpus
             X = x;
             Y = y;
         }
+
+        public static bool operator == (Location l1, Location l2)
+        {
+            return l1.X == l2.X && l1.Y == l2.Y;
+        }
+
+        public static bool operator != (Location l1, Location l2)
+        {
+            return l1.X != l2.X || l1.Y != l2.Y;
+        }
     }
 }
