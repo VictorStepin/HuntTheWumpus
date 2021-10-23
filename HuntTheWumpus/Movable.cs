@@ -2,10 +2,12 @@
 {
     abstract class Movable
     {
+        public bool Alive { get; set; }
         public Location Location { get; private set; }
 
         public Movable(Location location)
         {
+            Alive = true;
             Location = location;
         }
 

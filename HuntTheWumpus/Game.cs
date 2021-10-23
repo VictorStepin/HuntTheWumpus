@@ -10,20 +10,16 @@ namespace HuntTheWumpus
         private Player _player;
         private Wumpus _wumpus;
 
-        private bool _isRunning;
-
         public Game ()
         {
             _maze = new Maze(MAZE_DIMENSION);
             _player = new Player(new Location(1, 2));
             _wumpus = new Wumpus(new Location(4, 3));
-
-            _isRunning = true;
         }
 
         public void Run ()
         {
-            while (_isRunning)
+            while (_player.Alive && _wumpus.Alive)
             {
                 UpdateMaze();
 
@@ -33,13 +29,20 @@ namespace HuntTheWumpus
                 Direction wumpusDirection = (Direction)new Random().Next(0, 4);
                 PerformWumpusMove(wumpusDirection);
 
-                if (IsGameOver())
+                if (WumpusAtePlayer())
                 {
                     UpdateMaze();
-                    Console.WriteLine("\nВампус съел тебя!");
-                    Console.WriteLine("Игра закончена.");
-                    _isRunning = false;
+                    _player.Alive = false;
                 }
+            }
+
+            if (!_player.Alive)
+            {
+                Console.WriteLine("Игра закончена.");
+            }
+            else if (!_wumpus.Alive)
+            {
+                Console.WriteLine("Вы убили Вампуса. Победа!");
             }
         }
 
@@ -51,7 +54,6 @@ namespace HuntTheWumpus
 
             _maze.Cells[_player.Location.X, _player.Location.Y].Content = CellContent.Player;
             _maze.Cells[_wumpus.Location.X, _wumpus.Location.Y].Content = CellContent.Wumpus;
-
 
             for (int y = 0; y < _maze.Cells.GetLength(1); y++)
             {
@@ -106,9 +108,16 @@ namespace HuntTheWumpus
                         _player.Move(Direction.Right);
                     }
                     break;
+                case ConsoleKey.UpArrow:
+                    if (_wumpus.Location.X == _player.Location.X &&
+                        _wumpus.Location.Y == _player.Location.Y - 1)
+                    {
+                        _wumpus.Alive = false;
+                    }
+                    break;
                 case ConsoleKey.X:
                     Console.Clear();
-                    _isRunning = false;
+                   _player.Alive = false;
                     break;
             }
         }
@@ -144,7 +153,7 @@ namespace HuntTheWumpus
             }
         }
 
-        private bool IsGameOver()
+        private bool WumpusAtePlayer()
         {
             return _player.Location.X == _wumpus.Location.X && _player.Location.Y == _wumpus.Location.Y;
         }
