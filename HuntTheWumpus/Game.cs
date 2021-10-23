@@ -67,17 +67,30 @@ namespace HuntTheWumpus
                             Console.Write("[ ]");
                             break;
                         case CellContent.Player:
-                            Console.Write("[@]");
+                            Console.Write("[");
+                            Console.ForegroundColor = ConsoleColor.Green;
+                            Console.Write("@");
+                            Console.ForegroundColor = ConsoleColor.White;
+                            Console.Write("]");
                             break;
                         case CellContent.Wumpus:
-                            Console.Write("[W]");
+                            Console.Write("[");
+                            Console.ForegroundColor = ConsoleColor.Red;
+                            Console.Write("W");
+                            Console.ForegroundColor = ConsoleColor.White;
+                            Console.Write("]");
                             break;
                     }
                 }
                 Console.WriteLine();
             }
 
-            Console.WriteLine("X - выход");
+            if (TwoObjectsLocationsNearby(_player.Location, _wumpus.Location))
+            {
+                Console.WriteLine("¬ы чувствуете отвратительный запах..");
+            }
+
+            Console.WriteLine("\nX - выход");
         }
 
         private void PerformPlayerAction(ConsoleKey actionKey)
@@ -115,47 +128,88 @@ namespace HuntTheWumpus
                         _wumpus.Alive = false;
                     }
                     break;
+                case ConsoleKey.LeftArrow:
+                    if (_wumpus.Location.X == _player.Location.X - 1 &&
+                        _wumpus.Location.Y == _player.Location.Y)
+                    {
+                        _wumpus.Alive = false;
+                    }
+                    break;
+                case ConsoleKey.DownArrow:
+                    if (_wumpus.Location.X == _player.Location.X &&
+                        _wumpus.Location.Y == _player.Location.Y + 1)
+                    {
+                        _wumpus.Alive = false;
+                    }
+                    break;
+                case ConsoleKey.RightArrow:
+                    if (_wumpus.Location.X == _player.Location.X + 1 &&
+                        _wumpus.Location.Y == _player.Location.Y)
+                    {
+                        _wumpus.Alive = false;
+                    }
+                    break;
                 case ConsoleKey.X:
-                    Console.Clear();
-                   _player.Alive = false;
+                    _player.Alive = false;
                     break;
             }
         }
 
         private void PerformWumpusMove(Direction wumpusDirection)
         {
-            switch (wumpusDirection)
+            int moveProbability = new Random().Next(0, 100);
+            if (moveProbability <= 25)
             {
-                case Direction.Up:
-                    if (_wumpus.Location.Y != 0)
-                    {
-                        _wumpus.Move(wumpusDirection);
-                    }
-                    break;
-                case Direction.Right:
-                    if (_wumpus.Location.X != _maze.Cells.GetLength(0) - 1)
-                    {
-                        _wumpus.Move(wumpusDirection);
-                    }
-                    break;
-                case Direction.Down:
-                    if (_wumpus.Location.Y != _maze.Cells.GetLength(1) - 1)
-                    {
-                        _wumpus.Move(wumpusDirection);
-                    }
-                    break;
-                case Direction.Left:
-                    if (_wumpus.Location.X != 0)
-                    {
-                        _wumpus.Move(wumpusDirection);
-                    }
-                    break;
+                switch (wumpusDirection)
+                {
+                    case Direction.Up:
+                        if (_wumpus.Location.Y != 0)
+                        {
+                            _wumpus.Move(wumpusDirection);
+                        }
+                        break;
+                    case Direction.Right:
+                        if (_wumpus.Location.X != _maze.Cells.GetLength(0) - 1)
+                        {
+                            _wumpus.Move(wumpusDirection);
+                        }
+                        break;
+                    case Direction.Down:
+                        if (_wumpus.Location.Y != _maze.Cells.GetLength(1) - 1)
+                        {
+                            _wumpus.Move(wumpusDirection);
+                        }
+                        break;
+                    case Direction.Left:
+                        if (_wumpus.Location.X != 0)
+                        {
+                            _wumpus.Move(wumpusDirection);
+                        }
+                        break;
+                }
             }
         }
 
         private bool WumpusAtePlayer()
         {
             return _player.Location.X == _wumpus.Location.X && _player.Location.Y == _wumpus.Location.Y;
+        }
+
+        private bool TwoObjectsLocationsNearby(Location ol1, Location ol2)
+        {
+            if (ol1.X == ol2.X && ol1.Y == ol2.Y + 1 ||
+                ol1.X == ol2.X - 1 && ol1.Y == ol2.Y + 1 ||
+                ol1.X == ol2.X - 1 && ol1.Y == ol2.Y ||
+                ol1.X == ol2.X - 1 && ol1.Y == ol2.Y - 1 ||
+                ol1.X == ol2.X && ol1.Y == ol2.Y - 1 ||
+                ol1.X == ol2.X + 1 && ol1.Y == ol2.Y - 1 ||
+                ol1.X == ol2.X + 1 && ol1.Y == ol2.Y ||
+                ol1.X == ol2.X + 1 && ol1.Y == ol2.Y + 1)
+            {
+                return true;
+            }
+            
+            return false;
         }
     }
 }
