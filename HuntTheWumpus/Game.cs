@@ -195,7 +195,7 @@ namespace HuntTheWumpus
         private void PerformWumpusMove (Direction wumpusDirection)
         {
             int moveProbability = new Random().Next(0, 100);
-            if (moveProbability <= 25)
+            if (moveProbability <= 25 && _wumpus.Alive)
             {
                 switch (wumpusDirection)
                 {
