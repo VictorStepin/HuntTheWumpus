@@ -23,7 +23,7 @@ namespace HuntTheWumpus
             Location playerStartLocation = new Location(rng.Next(0, _maze.Cells.GetLength(0)),
                                                         rng.Next(0, _maze.Cells.GetLength(1)));
             _player = new Player(playerStartLocation);
-            
+
             Location wumpusStartLocation = new Location(rng.Next(0, _maze.Cells.GetLength(0)),
                                                         rng.Next(0, _maze.Cells.GetLength(1)));
             while (wumpusStartLocation == playerStartLocation || TwoObjectsLocationsNearby(playerStartLocation, wumpusStartLocation))
@@ -39,7 +39,7 @@ namespace HuntTheWumpus
 
         public void Run ()
         {
-            while (_player.Alive && _wumpus.Alive)
+            while (_player.IsAlive && _wumpus.IsAlive)
             {
                 UpdateMaze();
                 ClearMessages();
@@ -50,7 +50,7 @@ namespace HuntTheWumpus
                 Direction wumpusDirection = (Direction)new Random().Next(0, 4);
                 PerformWumpusMove(wumpusDirection);
 
-                if (TwoObjectsLocationsNearby(_player.Location, _wumpus.Location))
+                if (TwoObjectsLocationsNearby(_player.GetLocation(), _wumpus.GetLocation()))
                 {
                     AddMessage("Вы чувствуете отвратительный запах..");
                 }
@@ -60,15 +60,15 @@ namespace HuntTheWumpus
                     _wumpusRevealed = true;
                     AddMessage("Вампус съел вас!");
                     UpdateMaze();
-                    _player.Alive = false;
+                    _player.IsAlive = false;
                 }
             }
 
-            if (!_player.Alive)
+            if (!_player.IsAlive)
             {
                 AddMessage("Игра закончена.");
             }
-            else if (!_wumpus.Alive)
+            else if (!_wumpus.IsAlive)
             {
                 AddMessage("Вы убили Вампуса. Победа!");
             }
@@ -81,8 +81,8 @@ namespace HuntTheWumpus
             Console.Clear();
             _maze.Clear();
 
-            _maze.Cells[_player.Location.X, _player.Location.Y].Content = CellContent.Player;
-            _maze.Cells[_wumpus.Location.X, _wumpus.Location.Y].Content = CellContent.Wumpus;
+            _maze.Cells[_player.GetLocation().X, _player.GetLocation().Y].Content = CellContent.Player;
+            _maze.Cells[_wumpus.GetLocation().X, _wumpus.GetLocation().Y].Content = CellContent.Wumpus;
 
             for (int y = 0; y < _maze.Cells.GetLength(1); y++)
             {
@@ -131,63 +131,63 @@ namespace HuntTheWumpus
             switch (actionKey)
             {
                 case ConsoleKey.W:
-                    if (_player.Location.Y != 0)
+                    if (_player.GetLocation().Y != 0)
                     {
                         _player.Move(Direction.Up);
                     }
                     break;
                 case ConsoleKey.A:
-                    if (_player.Location.X != 0)
+                    if (_player.GetLocation().X != 0)
                     {
                         _player.Move(Direction.Left);
                     }
                     break;
                 case ConsoleKey.S:
-                    if (_player.Location.Y != _maze.Cells.GetLength(1) - 1)
+                    if (_player.GetLocation().Y != _maze.Cells.GetLength(1) - 1)
                     {
                         _player.Move(Direction.Down);
                     }
                     break;
                 case ConsoleKey.D:
-                    if (_player.Location.X != _maze.Cells.GetLength(0) - 1)
+                    if (_player.GetLocation().X != _maze.Cells.GetLength(0) - 1)
                     {
                         _player.Move(Direction.Right);
                     }
                     break;
                 case ConsoleKey.UpArrow:
-                    if (_wumpus.Location.X == _player.Location.X &&
-                        _wumpus.Location.Y == _player.Location.Y - 1)
+                    if (_wumpus.GetLocation().X == _player.GetLocation().X &&
+                        _wumpus.GetLocation().Y == _player.GetLocation().Y - 1)
                     {
                         _wumpusRevealed = true;
-                        _wumpus.Alive = false;
+                        _wumpus.IsAlive = false;
                     }
                     break;
                 case ConsoleKey.LeftArrow:
-                    if (_wumpus.Location.X == _player.Location.X - 1 &&
-                        _wumpus.Location.Y == _player.Location.Y)
+                    if (_wumpus.GetLocation().X == _player.GetLocation().X - 1 &&
+                        _wumpus.GetLocation().Y == _player.GetLocation().Y)
                     {
                         _wumpusRevealed = true;
-                        _wumpus.Alive = false;
+                        _wumpus.IsAlive = false;
                     }
                     break;
                 case ConsoleKey.DownArrow:
-                    if (_wumpus.Location.X == _player.Location.X &&
-                        _wumpus.Location.Y == _player.Location.Y + 1)
+                    if (_wumpus.GetLocation().X == _player.GetLocation().X &&
+                        _wumpus.GetLocation().Y == _player.GetLocation().Y + 1)
                     {
                         _wumpusRevealed = true;
-                        _wumpus.Alive = false;
+                        _wumpus.IsAlive = false;
                     }
                     break;
                 case ConsoleKey.RightArrow:
-                    if (_wumpus.Location.X == _player.Location.X + 1 &&
-                        _wumpus.Location.Y == _player.Location.Y)
+                    if (_wumpus.GetLocation().X == _player.GetLocation().X + 1 &&
+                        _wumpus.GetLocation().Y == _player.GetLocation().Y)
                     {
                         _wumpusRevealed = true;
-                        _wumpus.Alive = false;
+                        _wumpus.IsAlive = false;
                     }
                     break;
                 case ConsoleKey.X:
-                    _player.Alive = false;
+                    _player.IsAlive = false;
                     break;
             }
         }
@@ -195,30 +195,30 @@ namespace HuntTheWumpus
         private void PerformWumpusMove (Direction wumpusDirection)
         {
             int moveProbability = new Random().Next(0, 100);
-            if (moveProbability <= 25 && _wumpus.Alive)
+            if (moveProbability <= 25 && _wumpus.IsAlive)
             {
                 switch (wumpusDirection)
                 {
                     case Direction.Up:
-                        if (_wumpus.Location.Y != 0)
+                        if (_wumpus.GetLocation().Y != 0)
                         {
                             _wumpus.Move(wumpusDirection);
                         }
                         break;
                     case Direction.Right:
-                        if (_wumpus.Location.X != _maze.Cells.GetLength(0) - 1)
+                        if (_wumpus.GetLocation().X != _maze.Cells.GetLength(0) - 1)
                         {
                             _wumpus.Move(wumpusDirection);
                         }
                         break;
                     case Direction.Down:
-                        if (_wumpus.Location.Y != _maze.Cells.GetLength(1) - 1)
+                        if (_wumpus.GetLocation().Y != _maze.Cells.GetLength(1) - 1)
                         {
                             _wumpus.Move(wumpusDirection);
                         }
                         break;
                     case Direction.Left:
-                        if (_wumpus.Location.X != 0)
+                        if (_wumpus.GetLocation().X != 0)
                         {
                             _wumpus.Move(wumpusDirection);
                         }
@@ -229,7 +229,7 @@ namespace HuntTheWumpus
 
         private bool WumpusAtePlayer ()
         {
-            return _player.Location.X == _wumpus.Location.X && _player.Location.Y == _wumpus.Location.Y;
+            return _player.GetLocation() == _wumpus.GetLocation();
         }
 
         private bool TwoObjectsLocationsNearby (Location ol1, Location ol2)
