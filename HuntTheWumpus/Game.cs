@@ -18,21 +18,27 @@ namespace HuntTheWumpus
         {
             Random rng = new Random();
 
-            _maze = new Maze(MAZE_DIMENSION);
-
-            Location playerStartLocation = new Location(rng.Next(0, _maze.Cells.GetLength(0)),
-                                                        rng.Next(0, _maze.Cells.GetLength(1)));
+            Location playerStartLocation = new Location(rng.Next(0, MAZE_DIMENSION),
+                                                        rng.Next(0, MAZE_DIMENSION));
             _player = new Player(playerStartLocation);
 
-            Location wumpusStartLocation = new Location(rng.Next(0, _maze.Cells.GetLength(0)),
-                                                        rng.Next(0, _maze.Cells.GetLength(1)));
-            while (wumpusStartLocation == playerStartLocation || TwoObjectsLocationsNearby(playerStartLocation, wumpusStartLocation))
+            Location wumpusStartLocation = new Location(rng.Next(0, MAZE_DIMENSION),
+                                                        rng.Next(0, MAZE_DIMENSION));
+            while (wumpusStartLocation == playerStartLocation || TwoObjectsLocateNearby(playerStartLocation, wumpusStartLocation))
             {
-                wumpusStartLocation = new Location(rng.Next(0, _maze.Cells.GetLength(0)),
-                                                   rng.Next(0, _maze.Cells.GetLength(1)));
+                wumpusStartLocation = new Location(rng.Next(0, MAZE_DIMENSION),
+                                                   rng.Next(0, MAZE_DIMENSION));
             }
             _wumpus = new Wumpus(wumpusStartLocation);
             _wumpusRevealed = false;
+
+            GameObject[] gameObjects = new GameObject[]
+            {
+                _player,
+                _wumpus
+            };
+
+            _maze = new Maze(MAZE_DIMENSION, gameObjects);
 
             _messages = new string[MESSAGES_MAX_COUNT];
         }
@@ -41,7 +47,8 @@ namespace HuntTheWumpus
         {
             while (_player.IsAlive && _wumpus.IsAlive)
             {
-                UpdateMaze();
+                _maze.Update();
+                Render();
                 ClearMessages();
 
                 ConsoleKey actionKey = Console.ReadKey(true).Key;
@@ -50,7 +57,7 @@ namespace HuntTheWumpus
                 Direction wumpusDirection = (Direction)new Random().Next(0, 4);
                 PerformWumpusMove(wumpusDirection);
 
-                if (TwoObjectsLocationsNearby(_player.GetLocation(), _wumpus.GetLocation()))
+                if (TwoObjectsLocateNearby(_player.GetLocation(), _wumpus.GetLocation()))
                 {
                     AddMessage("Вы чувствуете отвратительный запах..");
                 }
@@ -59,7 +66,8 @@ namespace HuntTheWumpus
                 {
                     _wumpusRevealed = true;
                     AddMessage("Вампус съел вас!");
-                    UpdateMaze();
+                    _maze.Update();
+                    Render();
                     _player.IsAlive = false;
                 }
             }
@@ -72,25 +80,25 @@ namespace HuntTheWumpus
             {
                 AddMessage("Вы убили Вампуса. Победа!");
             }
-            UpdateMaze();
 
+            _maze.Update();
+            Render();
         }
 
-        private void UpdateMaze ()
+        /// <summary>
+        /// Renders maze and prints messages to console.
+        /// </summary>
+        private void Render ()
         {
             Console.Clear();
-            _maze.Clear();
 
-            _maze.Cells[_player.GetLocation().X, _player.GetLocation().Y].Content = CellContent.Player;
-            _maze.Cells[_wumpus.GetLocation().X, _wumpus.GetLocation().Y].Content = CellContent.Wumpus;
-
-            for (int y = 0; y < _maze.Cells.GetLength(1); y++)
+            for (int y = 0; y < MAZE_DIMENSION; y++)
             {
-                for (int x = 0; x < _maze.Cells.GetLength(0); x++)
+                for (int x = 0; x < MAZE_DIMENSION; x++)
                 {
-                    Cell cell = _maze.Cells[x, y];
+                    Cell cell = _maze.GetCells()[x, y];
 
-                    switch (cell.Content)
+                    switch (cell.GetContent())
                     {
                         case CellContent.Empty:
                             Console.Write("[ ]");
@@ -143,13 +151,13 @@ namespace HuntTheWumpus
                     }
                     break;
                 case ConsoleKey.S:
-                    if (_player.GetLocation().Y != _maze.Cells.GetLength(1) - 1)
+                    if (_player.GetLocation().Y != MAZE_DIMENSION - 1)
                     {
                         _player.Move(Direction.Down);
                     }
                     break;
                 case ConsoleKey.D:
-                    if (_player.GetLocation().X != _maze.Cells.GetLength(0) - 1)
+                    if (_player.GetLocation().X != MAZE_DIMENSION - 1)
                     {
                         _player.Move(Direction.Right);
                     }
@@ -206,13 +214,13 @@ namespace HuntTheWumpus
                         }
                         break;
                     case Direction.Right:
-                        if (_wumpus.GetLocation().X != _maze.Cells.GetLength(0) - 1)
+                        if (_wumpus.GetLocation().X != MAZE_DIMENSION - 1)
                         {
                             _wumpus.Move(wumpusDirection);
                         }
                         break;
                     case Direction.Down:
-                        if (_wumpus.GetLocation().Y != _maze.Cells.GetLength(1) - 1)
+                        if (_wumpus.GetLocation().Y != MAZE_DIMENSION - 1)
                         {
                             _wumpus.Move(wumpusDirection);
                         }
@@ -232,7 +240,7 @@ namespace HuntTheWumpus
             return _player.GetLocation() == _wumpus.GetLocation();
         }
 
-        private bool TwoObjectsLocationsNearby (Location ol1, Location ol2)
+        private bool TwoObjectsLocateNearby (Location ol1, Location ol2)
         {
             if (ol1.X == ol2.X && ol1.Y == ol2.Y + 1 ||
                 ol1.X == ol2.X - 1 && ol1.Y == ol2.Y + 1 ||

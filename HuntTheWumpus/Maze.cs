@@ -2,26 +2,44 @@ namespace HuntTheWumpus
 {
     class Maze
     {
-        public Cell[,] Cells { get; }
+        private GameObject[] _gameObjects;
+        private Cell[,] _cells;
 
-        public Maze (int dimension)
+        public Maze (int dimension, GameObject[] gameObjects)
         {
-            Cells = new Cell[dimension, dimension];
-            for (int x = 0; x < Cells.GetLength(0); x++)
+            _gameObjects = gameObjects;
+
+            _cells = (new Cell[dimension, dimension]);
+            for (int x = 0; x < _cells.GetLength(0); x++)
             {
-                for (int y = 0; y < Cells.GetLength(1); y++)
+                for (int y = 0; y < _cells.GetLength(1); y++)
                 {
                     Cell cell = new Cell(CellContent.Empty);
-                    Cells[x, y] = cell;
+                    _cells[x, y] = cell;
                 }
             }
         }
 
-        public void Clear ()
+        public Cell[,] GetCells()
         {
-            foreach (Cell cell in Cells)
+            return _cells;
+        }
+
+        /// <summary>
+        /// Updates maze's state.
+        /// </summary>
+        public void Update()
+        {
+            Clear();
+            _cells[_gameObjects[0].GetLocation().X, _gameObjects[0].GetLocation().Y].SetContent(CellContent.Player);
+            _cells[_gameObjects[1].GetLocation().X, _gameObjects[1].GetLocation().Y].SetContent(CellContent.Wumpus);
+        }
+
+        private void Clear ()
+        {
+            foreach (Cell cell in _cells)
             {
-                cell.Content = CellContent.Empty;
+                cell.SetContent(CellContent.Empty);
             }
         }
     }

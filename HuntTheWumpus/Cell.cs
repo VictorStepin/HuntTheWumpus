@@ -2,11 +2,21 @@ namespace HuntTheWumpus
 {
     class Cell
     {
-        public CellContent Content { get; set; }
+        private CellContent _content;
 
-        public Cell (CellContent content)
+        public Cell (CellContent _content)
         {
-            Content = content;
+            SetContent(_content);
+        }
+
+        public CellContent GetContent()
+        {
+            return _content;
+        }
+
+        public void SetContent(CellContent value)
+        {
+            _content = value;
         }
     }
 }
