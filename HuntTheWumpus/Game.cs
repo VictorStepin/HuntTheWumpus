@@ -14,18 +14,16 @@ namespace HuntTheWumpus
 
         public Game()
         {
-            Random rng = new Random();
-
-            Location playerStartLocation = new Location(rng.Next(0, MAZE_DIMENSION),
-                                                        rng.Next(0, MAZE_DIMENSION));
+            Location playerStartLocation = new Location(RNG.NumberBetween(0, MAZE_DIMENSION),
+                                                        RNG.NumberBetween(0, MAZE_DIMENSION));
             _player = new Player(playerStartLocation);
 
-            Location wumpusStartLocation = new Location(rng.Next(0, MAZE_DIMENSION),
-                                                        rng.Next(0, MAZE_DIMENSION));
+            Location wumpusStartLocation = new Location(RNG.NumberBetween(0, MAZE_DIMENSION),
+                                                        RNG.NumberBetween(0, MAZE_DIMENSION));
             while (wumpusStartLocation == playerStartLocation || TwoObjectsLocateNearby(playerStartLocation, wumpusStartLocation))
             {
-                wumpusStartLocation = new Location(rng.Next(0, MAZE_DIMENSION),
-                                                   rng.Next(0, MAZE_DIMENSION));
+                wumpusStartLocation = new Location(RNG.NumberBetween(0, MAZE_DIMENSION),
+                                                   RNG.NumberBetween(0, MAZE_DIMENSION));
             }
             _wumpus = new Wumpus(wumpusStartLocation);
             _wumpusRevealed = false;
@@ -50,7 +48,7 @@ namespace HuntTheWumpus
                 ConsoleKey actionKey = Console.ReadKey(true).Key;
                 PerformPlayerAction(actionKey);
 
-                Direction wumpusDirection = (Direction)new Random().Next(0, 4);
+                Direction wumpusDirection = (Direction)RNG.NumberBetween(0, 4);
                 PerformWumpusMove(wumpusDirection);
 
                 if (TwoObjectsLocateNearby(_player.GetLocation(), _wumpus.GetLocation()))
@@ -211,7 +209,7 @@ namespace HuntTheWumpus
 
         private void PerformWumpusMove(Direction wumpusDirection)
         {
-            int moveProbability = new Random().Next(0, 100);
+            int moveProbability = RNG.NumberBetween(0, 100);
             if (moveProbability <= 25 && _wumpus.IsAlive)
             {
                 switch (wumpusDirection)
