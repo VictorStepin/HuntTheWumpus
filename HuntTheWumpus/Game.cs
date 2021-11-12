@@ -43,6 +43,7 @@ namespace HuntTheWumpus
             {
                 _maze.Update();
                 Render();
+                PrintMessages();
                 Messenger.ClearMessages();
 
                 ConsoleKey actionKey = Console.ReadKey(true).Key;
@@ -62,6 +63,7 @@ namespace HuntTheWumpus
                     Messenger.AddMessage("Вампус съел вас!");
                     _maze.Update();
                     Render();
+                    PrintMessages();
                     _player.IsAlive = false;
                 }
             }
@@ -77,10 +79,11 @@ namespace HuntTheWumpus
 
             _maze.Update();
             Render();
+            PrintMessages();
         }
 
         /// <summary>
-        /// Renders maze and prints messages to console.
+        /// Renders maze.
         /// </summary>
         private void Render()
         {
@@ -122,12 +125,11 @@ namespace HuntTheWumpus
                 }
                 Console.WriteLine();
             }
-
-            PrintMessages();
-
-            Console.WriteLine("\nX - выход");
         }
 
+        /// <summary>
+        /// Prints messages to console.
+        /// </summary>
         private void PrintMessages()
         {
             string[] messages = Messenger.GetMessages();
@@ -139,6 +141,8 @@ namespace HuntTheWumpus
                     Console.WriteLine(messages[i]);
                 }
             }
+
+            Console.WriteLine("\nX - выход");
         }
 
         private void PerformPlayerAction(ConsoleKey actionKey)

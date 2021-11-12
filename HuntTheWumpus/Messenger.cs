@@ -9,6 +9,10 @@
         {
             _messages = new string[MESSAGES_MAX_COUNT];
         }
+        public static string[] GetMessages()
+        {
+            return _messages;
+        }
 
         public static void ClearMessages()
         {
@@ -36,11 +40,6 @@
                 //Console.WriteLine("ERROR!!!!!!!");
                 //TODO: Если сообщение не добавилось, то нужно выбрасывать исключение
             }
-        }
-
-        public static string[] GetMessages()
-        {
-            return _messages;
         }
     }
 }
