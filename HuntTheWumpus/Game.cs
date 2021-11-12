@@ -5,16 +5,14 @@ namespace HuntTheWumpus
     class Game
     {
         private const int MAZE_DIMENSION = 6;
-        private const int MESSAGES_MAX_COUNT = 5;
 
         private Maze _maze;
         private Player _player;
         private Wumpus _wumpus;
         private bool _wumpusRevealed;
 
-        private string[] _messages;
 
-        public Game ()
+        public Game()
         {
             Random rng = new Random();
 
@@ -39,17 +37,15 @@ namespace HuntTheWumpus
             };
 
             _maze = new Maze(MAZE_DIMENSION, gameObjects);
-
-            _messages = new string[MESSAGES_MAX_COUNT];
         }
 
-        public void Run ()
+        public void Run()
         {
             while (_player.IsAlive && _wumpus.IsAlive)
             {
                 _maze.Update();
                 Render();
-                ClearMessages();
+                Messenger.ClearMessages();
 
                 ConsoleKey actionKey = Console.ReadKey(true).Key;
                 PerformPlayerAction(actionKey);
@@ -59,13 +55,13 @@ namespace HuntTheWumpus
 
                 if (TwoObjectsLocateNearby(_player.GetLocation(), _wumpus.GetLocation()))
                 {
-                    AddMessage("Вы чувствуете отвратительный запах..");
+                    Messenger.AddMessage("Вы чувствуете отвратительный запах..");
                 }
 
                 if (WumpusAtePlayer())
                 {
                     _wumpusRevealed = true;
-                    AddMessage("Вампус съел вас!");
+                    Messenger.AddMessage("Вампус съел вас!");
                     _maze.Update();
                     Render();
                     _player.IsAlive = false;
@@ -74,11 +70,11 @@ namespace HuntTheWumpus
 
             if (!_player.IsAlive)
             {
-                AddMessage("Игра закончена.");
+                Messenger.AddMessage("Игра закончена.");
             }
             else if (!_wumpus.IsAlive)
             {
-                AddMessage("Вы убили Вампуса. Победа!");
+                Messenger.AddMessage("Вы убили Вампуса. Победа!");
             }
 
             _maze.Update();
@@ -88,7 +84,7 @@ namespace HuntTheWumpus
         /// <summary>
         /// Renders maze and prints messages to console.
         /// </summary>
-        private void Render ()
+        private void Render()
         {
             Console.Clear();
 
@@ -134,7 +130,20 @@ namespace HuntTheWumpus
             Console.WriteLine("\nX - выход");
         }
 
-        private void PerformPlayerAction (ConsoleKey actionKey)
+        private void PrintMessages()
+        {
+            string[] messages = Messenger.GetMessages();
+
+            for (int i = 0; i < messages.Length; i++)
+            {
+                if (messages[i] != null)
+                {
+                    Console.WriteLine(messages[i]);
+                }
+            }
+        }
+
+        private void PerformPlayerAction(ConsoleKey actionKey)
         {
             switch (actionKey)
             {
@@ -200,7 +209,7 @@ namespace HuntTheWumpus
             }
         }
 
-        private void PerformWumpusMove (Direction wumpusDirection)
+        private void PerformWumpusMove(Direction wumpusDirection)
         {
             int moveProbability = new Random().Next(0, 100);
             if (moveProbability <= 25 && _wumpus.IsAlive)
@@ -235,12 +244,12 @@ namespace HuntTheWumpus
             }
         }
 
-        private bool WumpusAtePlayer ()
+        private bool WumpusAtePlayer()
         {
             return _player.GetLocation() == _wumpus.GetLocation();
         }
 
-        private bool TwoObjectsLocateNearby (Location ol1, Location ol2)
+        private bool TwoObjectsLocateNearby(Location ol1, Location ol2)
         {
             if (ol1.X == ol2.X && ol1.Y == ol2.Y + 1 ||
                 ol1.X == ol2.X - 1 && ol1.Y == ol2.Y + 1 ||
@@ -253,46 +262,8 @@ namespace HuntTheWumpus
             {
                 return true;
             }
-            
+
             return false;
-        }
-
-        private void ClearMessages ()
-        {
-            for (int i = 0; i < _messages.Length; i++)
-            {
-                _messages[i] = null;
-            }
-        }
-
-        private void AddMessage (string message)
-        {
-            bool messageAdded = false;
-            for (int i = 0; i < _messages.Length; i++)
-            {
-                if (_messages[i] == null)
-                {
-                    _messages[i] = message;
-                    messageAdded = true;
-                    break;
-                }
-            }
-
-            if (!messageAdded)
-            {
-                Console.WriteLine("ERROR!!!!!!!");
-            }
-        }
-
-        private void PrintMessages ()
-        {
-            for (int i = 0; i < _messages.Length; i++)
-            {
-                if (_messages[i] != null)
-                {
-                    Console.WriteLine(_messages[i]);
-                }
-            }
         }
     }
 }
