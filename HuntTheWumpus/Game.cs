@@ -10,6 +10,10 @@ namespace HuntTheWumpus
         private Player _player;
         private Wumpus _wumpus;
         private bool _wumpusRevealed;
+        private Pit _pit1;
+        private bool _pit1Revealed;
+        private Pit _pit2;
+        private bool _pit2Revealed;
 
 
         public Game()
@@ -28,10 +32,36 @@ namespace HuntTheWumpus
             _wumpus = new Wumpus(wumpusStartLocation);
             _wumpusRevealed = false;
 
+            Location pit1StartLocation = new Location(RNG.NumberBetween(0, MAZE_DIMENSION),
+                                                      RNG.NumberBetween(0, MAZE_DIMENSION));
+            while (pit1StartLocation == playerStartLocation || 
+                   pit1StartLocation == wumpusStartLocation ||
+                   TwoObjectsLocateNearby(playerStartLocation, pit1StartLocation))
+            {
+                pit1StartLocation = new Location(RNG.NumberBetween(0, MAZE_DIMENSION),
+                                                 RNG.NumberBetween(0, MAZE_DIMENSION));
+            }
+            _pit1 = new Pit(pit1StartLocation);
+            _pit1Revealed = false;
+
+            Location pit2StartLocation = new Location(RNG.NumberBetween(0, MAZE_DIMENSION),
+                                                      RNG.NumberBetween(0, MAZE_DIMENSION));
+            while (pit2StartLocation == playerStartLocation ||
+                   pit2StartLocation == wumpusStartLocation ||
+                   TwoObjectsLocateNearby(playerStartLocation, pit2StartLocation))
+            {
+                pit2StartLocation = new Location(RNG.NumberBetween(0, MAZE_DIMENSION),
+                                                 RNG.NumberBetween(0, MAZE_DIMENSION));
+            }
+            _pit2 = new Pit(pit2StartLocation);
+            _pit2Revealed = false;
+
             GameObject[] gameObjects = new GameObject[]
             {
                 _player,
-                _wumpus
+                _wumpus,
+                _pit1,
+                _pit2
             };
 
             _maze = new Maze(MAZE_DIMENSION, gameObjects);
@@ -56,11 +86,26 @@ namespace HuntTheWumpus
                 {
                     Messenger.AddMessage("Вы чувствуете отвратительный запах..");
                 }
+                if (TwoObjectsLocateNearby(_player.GetLocation(), _pit1.GetLocation()) ||
+                    TwoObjectsLocateNearby(_player.GetLocation(), _pit2.GetLocation()))
+                {
+                    Messenger.AddMessage("Вы ощущаете сквозняк..");
+                }
 
                 if (WumpusAtePlayer())
                 {
                     _wumpusRevealed = true;
                     Messenger.AddMessage("Вампус съел вас!");
+                    _maze.Update();
+                    Render();
+                    PrintMessages();
+                    _player.IsAlive = false;
+                }
+                else if (PlayerFellIntoThePit())
+                {
+                    _pit1Revealed = true;
+                    _pit2Revealed = true;
+                    Messenger.AddMessage("Вы упали в яму!");
                     _maze.Update();
                     Render();
                     PrintMessages();
@@ -113,6 +158,20 @@ namespace HuntTheWumpus
                                 Console.Write("[");
                                 Console.ForegroundColor = ConsoleColor.Red;
                                 Console.Write("W");
+                                Console.ForegroundColor = ConsoleColor.White;
+                                Console.Write("]");
+                            }
+                            else
+                            {
+                                Console.Write("[ ]");
+                            }
+                            break;
+                        case CellContent.Pit: 
+                            if (_pit1Revealed || _pit2Revealed) // Неверная логика!!! Должна отображаться только одна яма
+                            {
+                                Console.Write("[");
+                                Console.ForegroundColor = ConsoleColor.DarkYellow;
+                                Console.Write("O");
                                 Console.ForegroundColor = ConsoleColor.White;
                                 Console.Write("]");
                             }
@@ -249,6 +308,12 @@ namespace HuntTheWumpus
         private bool WumpusAtePlayer()
         {
             return _player.GetLocation() == _wumpus.GetLocation();
+        }
+
+        private bool PlayerFellIntoThePit()
+        {
+            return _player.GetLocation() == _pit1.GetLocation() ||
+                   _player.GetLocation() == _pit2.GetLocation();
         }
 
         private bool TwoObjectsLocateNearby(Location ol1, Location ol2)

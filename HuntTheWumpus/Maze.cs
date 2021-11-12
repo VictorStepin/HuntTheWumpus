@@ -33,6 +33,8 @@ namespace HuntTheWumpus
             Clear();
             _cells[_gameObjects[0].GetLocation().X, _gameObjects[0].GetLocation().Y].SetContent(CellContent.Player);
             _cells[_gameObjects[1].GetLocation().X, _gameObjects[1].GetLocation().Y].SetContent(CellContent.Wumpus);
+            _cells[_gameObjects[2].GetLocation().X, _gameObjects[2].GetLocation().Y].SetContent(CellContent.Pit);
+            _cells[_gameObjects[3].GetLocation().X, _gameObjects[3].GetLocation().Y].SetContent(CellContent.Pit);
         }
 
         private void Clear ()
