@@ -14,16 +14,16 @@ namespace HuntTheWumpus
             switch (direction)
             {
                 case Direction.Up:
-                    _location = new Location(_location.X, _location.Y - 1);
+                    location = new Location(location.X, location.Y - 1);
                     break;
                 case Direction.Right:
-                    _location = new Location(_location.X + 1, _location.Y);
+                    location = new Location(location.X + 1, location.Y);
                     break;
                 case Direction.Down:
-                    _location = new Location(_location.X, _location.Y + 1);
+                    location = new Location(location.X, location.Y + 1);
                     break;
                 case Direction.Left:
-                    _location = new Location(_location.X - 1, _location.Y);
+                    location = new Location(location.X - 1, location.Y);
                     break;
             }
         }

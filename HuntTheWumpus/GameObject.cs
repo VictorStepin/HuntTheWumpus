@@ -2,16 +2,16 @@
 {
     abstract class GameObject
     {
-        protected Location _location;
+        protected Location location;
 
         public GameObject(Location location)
         {
-            _location = location;
+            this.location = location;
         }
 
         public Location GetLocation()
         {
-            return _location;
+            return location;
         }
     }
 }
