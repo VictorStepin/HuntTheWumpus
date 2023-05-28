@@ -1,11 +1,14 @@
 ﻿namespace HuntTheWumpus
 {
-    abstract class GameObject
+    abstract class MazeObject
     {
+        public bool Revealed { get; set; }
+        
         protected Location location;
 
-        public GameObject(Location location)
+        public MazeObject(Location location)
         {
+            Revealed = false;
             this.location = location;
         }
 

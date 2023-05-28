@@ -1,11 +1,11 @@
 namespace HuntTheWumpus
 {
-    class Maze
+    internal class Maze
     {
-        private GameObject[] _gameObjects;
+        private MazeObject[] _gameObjects;
         private Cell[,] _cells;
 
-        public Maze (int dimension, GameObject[] gameObjects)
+        public Maze (int dimension, MazeObject[] gameObjects)
         {
             _gameObjects = gameObjects;
 

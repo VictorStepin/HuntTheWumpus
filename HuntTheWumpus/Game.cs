@@ -2,25 +2,26 @@ using System;
 
 namespace HuntTheWumpus
 {
-    class Game
+    internal class Game
     {
         private const int MAZE_DIMENSION = 6;
+        private const int MAZE_OBJECTS_COUNT = 4;
+        private const int WUMPUS_MOVE_PROBABILITY = 25;
 
         private Maze _maze;
+        private MazeObject[] _mazeObjects;
         private Player _player;
         private Wumpus _wumpus;
-        private bool _wumpusRevealed;
         private Pit _pit1;
-        private bool _pit1Revealed;
         private Pit _pit2;
-        private bool _pit2Revealed;
-
+        private bool playerPerformedGameAction;
 
         public Game()
         {
             Location playerStartLocation = new Location(RNG.NumberBetween(0, MAZE_DIMENSION),
                                                         RNG.NumberBetween(0, MAZE_DIMENSION));
             _player = new Player(playerStartLocation);
+            _player.Revealed = true;
 
             Location wumpusStartLocation = new Location(RNG.NumberBetween(0, MAZE_DIMENSION),
                                                         RNG.NumberBetween(0, MAZE_DIMENSION));
@@ -30,7 +31,6 @@ namespace HuntTheWumpus
                                                    RNG.NumberBetween(0, MAZE_DIMENSION));
             }
             _wumpus = new Wumpus(wumpusStartLocation);
-            _wumpusRevealed = false;
 
             Location pit1StartLocation = new Location(RNG.NumberBetween(0, MAZE_DIMENSION),
                                                       RNG.NumberBetween(0, MAZE_DIMENSION));
@@ -42,7 +42,6 @@ namespace HuntTheWumpus
                                                  RNG.NumberBetween(0, MAZE_DIMENSION));
             }
             _pit1 = new Pit(pit1StartLocation);
-            _pit1Revealed = false;
 
             Location pit2StartLocation = new Location(RNG.NumberBetween(0, MAZE_DIMENSION),
                                                       RNG.NumberBetween(0, MAZE_DIMENSION));
@@ -54,9 +53,8 @@ namespace HuntTheWumpus
                                                  RNG.NumberBetween(0, MAZE_DIMENSION));
             }
             _pit2 = new Pit(pit2StartLocation);
-            _pit2Revealed = false;
 
-            GameObject[] gameObjects = new GameObject[]
+            _mazeObjects = new MazeObject[]
             {
                 _player,
                 _wumpus,
@@ -64,7 +62,7 @@ namespace HuntTheWumpus
                 _pit2
             };
 
-            _maze = new Maze(MAZE_DIMENSION, gameObjects);
+            _maze = new Maze(MAZE_DIMENSION, _mazeObjects);
         }
 
         public void Run()
@@ -75,9 +73,15 @@ namespace HuntTheWumpus
                 Render();
                 PrintMessages();
                 Messenger.ClearMessages();
+                playerPerformedGameAction = false;
 
-                ConsoleKey actionKey = Console.ReadKey(true).Key;
-                PerformPlayerAction(actionKey);
+                while (!playerPerformedGameAction)
+                {
+                    ConsoleKey actionKey = Console.ReadKey(true).Key;
+                    PerformPlayerAction(actionKey);
+                    Render();
+                    PrintMessages();
+                }
 
                 Direction wumpusDirection = (Direction)RNG.NumberBetween(0, 4);
                 PerformWumpusMove(wumpusDirection);
@@ -94,7 +98,7 @@ namespace HuntTheWumpus
 
                 if (WumpusAtePlayer())
                 {
-                    _wumpusRevealed = true;
+                    _wumpus.Revealed = true;
                     Messenger.AddMessage("Вампус съел вас!");
                     _maze.Update();
                     Render();
@@ -103,8 +107,8 @@ namespace HuntTheWumpus
                 }
                 else if (PlayerFellIntoThePit())
                 {
-                    _pit1Revealed = true;
-                    _pit2Revealed = true;
+                    _pit1.Revealed = true;
+                    _pit2.Revealed = true;
                     Messenger.AddMessage("Вы упали в яму!");
                     _maze.Update();
                     Render();
@@ -153,7 +157,7 @@ namespace HuntTheWumpus
                             Console.Write("]");
                             break;
                         case CellContent.Wumpus:
-                            if (_wumpusRevealed)
+                            if (_wumpus.Revealed)
                             {
                                 Console.Write("[");
                                 Console.ForegroundColor = ConsoleColor.Red;
@@ -167,7 +171,7 @@ namespace HuntTheWumpus
                             }
                             break;
                         case CellContent.Pit: 
-                            if (_pit1Revealed || _pit2Revealed) // Неверная логика!!! Должна отображаться только одна яма
+                            if (_pit1.Revealed || _pit2.Revealed) // Неверная логика!!! Должна отображаться только одна яма
                             {
                                 Console.Write("[");
                                 Console.ForegroundColor = ConsoleColor.DarkYellow;
@@ -204,6 +208,17 @@ namespace HuntTheWumpus
             Console.WriteLine("\nX - выход");
         }
 
+        private void ToggleObjectsVisibility()
+        {
+            foreach (var mazeObject in _mazeObjects)
+            {
+                if (!(mazeObject is Player))
+                {
+                    mazeObject.Revealed = !mazeObject.Revealed;
+                }
+            }
+        }
+
         private void PerformPlayerAction(ConsoleKey actionKey)
         {
             switch (actionKey)
@@ -212,60 +227,72 @@ namespace HuntTheWumpus
                     if (_player.GetLocation().Y != 0)
                     {
                         _player.Move(Direction.Up);
+                        playerPerformedGameAction = true;
                     }
                     break;
                 case ConsoleKey.A:
                     if (_player.GetLocation().X != 0)
                     {
                         _player.Move(Direction.Left);
+                        playerPerformedGameAction = true;
                     }
                     break;
                 case ConsoleKey.S:
                     if (_player.GetLocation().Y != MAZE_DIMENSION - 1)
                     {
                         _player.Move(Direction.Down);
+                        playerPerformedGameAction = true;
                     }
                     break;
                 case ConsoleKey.D:
                     if (_player.GetLocation().X != MAZE_DIMENSION - 1)
                     {
                         _player.Move(Direction.Right);
+                        playerPerformedGameAction = true;
                     }
                     break;
                 case ConsoleKey.UpArrow:
                     if (_wumpus.GetLocation().X == _player.GetLocation().X &&
                         _wumpus.GetLocation().Y == _player.GetLocation().Y - 1)
                     {
-                        _wumpusRevealed = true;
+                        _wumpus.Revealed = true;
                         _wumpus.IsAlive = false;
                     }
+                    playerPerformedGameAction = true;
                     break;
                 case ConsoleKey.LeftArrow:
                     if (_wumpus.GetLocation().X == _player.GetLocation().X - 1 &&
                         _wumpus.GetLocation().Y == _player.GetLocation().Y)
                     {
-                        _wumpusRevealed = true;
+                        _wumpus.Revealed = true;
                         _wumpus.IsAlive = false;
                     }
+                    playerPerformedGameAction = true;
                     break;
                 case ConsoleKey.DownArrow:
                     if (_wumpus.GetLocation().X == _player.GetLocation().X &&
                         _wumpus.GetLocation().Y == _player.GetLocation().Y + 1)
                     {
-                        _wumpusRevealed = true;
+                        _wumpus.Revealed = true;
                         _wumpus.IsAlive = false;
                     }
+                    playerPerformedGameAction = true;
                     break;
                 case ConsoleKey.RightArrow:
                     if (_wumpus.GetLocation().X == _player.GetLocation().X + 1 &&
                         _wumpus.GetLocation().Y == _player.GetLocation().Y)
                     {
-                        _wumpusRevealed = true;
+                        _wumpus.Revealed = true;
                         _wumpus.IsAlive = false;
                     }
+                    playerPerformedGameAction = true;
+                    break;
+                case ConsoleKey.R:
+                    ToggleObjectsVisibility();
                     break;
                 case ConsoleKey.X:
                     _player.IsAlive = false;
+                    playerPerformedGameAction = true;
                     break;
             }
         }
@@ -273,7 +300,7 @@ namespace HuntTheWumpus
         private void PerformWumpusMove(Direction wumpusDirection)
         {
             int moveProbability = RNG.NumberBetween(0, 100);
-            if (moveProbability <= 25 && _wumpus.IsAlive)
+            if (moveProbability <= WUMPUS_MOVE_PROBABILITY && _wumpus.IsAlive)
             {
                 switch (wumpusDirection)
                 {

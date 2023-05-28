@@ -1,6 +1,6 @@
 namespace HuntTheWumpus
 {
-    class Cell
+    internal class Cell
     {
         private CellContent _content;
 

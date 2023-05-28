@@ -1,6 +1,6 @@
 ﻿namespace HuntTheWumpus
 {
-    class Wumpus : GameObject, IMovable, ILivable
+    internal class Wumpus : MazeObject, IMovable, ILivable
     {
         public bool IsAlive { get; set; }
 

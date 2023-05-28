@@ -1,6 +1,6 @@
 ﻿namespace HuntTheWumpus
 {
-    class Pit : GameObject
+    internal class Pit : MazeObject
     {
         public Pit(Location location) : base(location) { }
     }
